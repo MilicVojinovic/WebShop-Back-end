@@ -8,9 +8,9 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { CartArticle } from "./CartArticle";
-import { User } from "./User";
-import { Order } from "./Order";
+import { CartArticle } from "./cart-article.entity";
+import { User } from "./user.entity";
+import { Order } from "./order.entity";
 
 @Index("fk_cart_user_id", ["userId"], {})
 @Entity("cart")

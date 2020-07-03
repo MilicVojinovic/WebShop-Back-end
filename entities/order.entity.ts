@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Cart } from "./Cart";
+import { Cart } from "./cart.entity";
 
 @Index("uq_order_cart_id", ["cartId"], { unique: true })
 @Entity("order")

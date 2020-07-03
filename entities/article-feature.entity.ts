@@ -6,8 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Article } from "./Article";
-import { Feature } from "./Feature";
+import { Article } from "./article.entity";
+import { Feature } from "./feature.entity";
 
 @Index("uq_article_feature_article_id_feature_id", ["articleId", "featureId"], {
   unique: true,
