@@ -38,6 +38,9 @@ export class Category {
   @OneToMany(() => Article, (article) => article.category)
   articles: Article[];
 
+
+
+
   @ManyToOne(() => Category, (category) => category.categories, {
     onDelete: "NO ACTION",
     onUpdate: "CASCADE",
@@ -46,6 +49,9 @@ export class Category {
     { name: "parent__category_id", referencedColumnName: "categoryId" },
   ])
   parentCategory: Category;
+
+
+  
 
   @OneToMany(() => Category, (category) => category.parentCategory)
   categories: Category[];
