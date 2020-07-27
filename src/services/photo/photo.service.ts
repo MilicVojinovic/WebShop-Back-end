@@ -13,7 +13,7 @@ export class PhotoService extends TypeOrmCrudService<Photo>{
         super(photo);
     }
 
-    add(newPhoto: Photo): Promise<Photo> {
+     add(newPhoto: Photo): Promise<Photo> {
         return this.photo.save(newPhoto)
     }
 
