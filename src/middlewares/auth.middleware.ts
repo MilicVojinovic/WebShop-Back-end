@@ -11,7 +11,7 @@ export class AuthMiddleware implements NestMiddleware {
 
     async use(req: Request, res: Response, next: NextFunction) {
 
-        
+
         if (!req.headers.authorization) {
             throw new HttpException('Token not found', HttpStatus.UNAUTHORIZED);
         }
@@ -20,12 +20,18 @@ export class AuthMiddleware implements NestMiddleware {
 
         const tokenParts = token.split(' ');
 
-        if(tokenParts.length !== 2 ) {
+        if (tokenParts.length !== 2) {
             throw new HttpException('Bad token found', HttpStatus.UNAUTHORIZED);
         }
 
 
-        const jwtData: JwtDataAdministratorDto = jwt.verify(tokenParts[1], jwtSecret);
+        let jwtData: JwtDataAdministratorDto;
+
+        try {
+            jwtData = jwt.verify(tokenParts[1], jwtSecret);
+        }  catch(e) {
+            throw new HttpException('Bad token found', HttpStatus.UNAUTHORIZED);
+        }
 
         if (!jwtData) {
             throw new HttpException('Bad token found', HttpStatus.UNAUTHORIZED);
@@ -36,22 +42,22 @@ export class AuthMiddleware implements NestMiddleware {
             throw new HttpException('Bad token found', HttpStatus.UNAUTHORIZED);
         }
 
-        if (jwtData.ua !== req.headers["user-agent"] ) {
+        if (jwtData.ua !== req.headers["user-agent"]) {
             throw new HttpException('Bad token found', HttpStatus.UNAUTHORIZED);
         }
 
-       const administator = await this.administratorService.getById(jwtData.administratorId);
+        const administator = await this.administratorService.getById(jwtData.administratorId);
 
-       if(!administator){
-        throw new HttpException('Account not found', HttpStatus.UNAUTHORIZED);
-       }
+        if (!administator) {
+            throw new HttpException('Account not found', HttpStatus.UNAUTHORIZED);
+        }
 
-       let sada = new Date();
-       const trenutniTimestamp = new Date().getTime() / 1000;
+        let sada = new Date();
+        const trenutniTimestamp = new Date().getTime() / 1000;
 
-       if(trenutniTimestamp >= jwtData.ext) {
-        throw new HttpException('The token has expired', HttpStatus.UNAUTHORIZED);
-       }
+        if (trenutniTimestamp >= jwtData.exp) {
+            throw new HttpException('The token has expired', HttpStatus.UNAUTHORIZED);
+        }
 
         next();
     }
