@@ -20,7 +20,7 @@ import * as sharp from 'sharp';
     },
     params: {
         id: {
-            field: 'articleId',
+            field: 'articleId', // kod milana taira je article_id
             type: 'number',
             primary: true
         }

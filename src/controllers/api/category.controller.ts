@@ -10,7 +10,7 @@ import { CategoryService } from "src/services/category/category.service";
     },
     params: {
         id: {
-            field: 'categoryId',
+            field: 'categoryId', // kod milana taira je category_id
             type: 'number',
             primary: true
         }
