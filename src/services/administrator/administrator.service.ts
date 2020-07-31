@@ -27,10 +27,7 @@ export class AdministratorService {
         if(admin){
             return admin;
         }
-
         return null; 
-
-
     }
 
     getById(id: number): Promise<Administrator>{
