@@ -50,7 +50,23 @@ import { RoleCheckerGuard } from "src/misc/role.checker.guard";
 
     },
     routes: {
-        exclude: ['updateOneBase', 'replaceOneBase', 'deleteOneBase'],
+        only: [
+            'getOneBase',
+            'getManyBase'
+        ],
+        getOneBase: {
+            decorators:[
+                UseGuards(RoleCheckerGuard),
+                AllowToRoles('administrator','user')
+            ]
+        },
+        getManyBase: {
+            decorators:[
+                UseGuards(RoleCheckerGuard),
+                AllowToRoles('administrator','user')
+            ]
+        }
+
     }
 })
 export class ArticleController {
@@ -60,7 +76,7 @@ export class ArticleController {
         public photoService: PhotoService,
     ) { }
 
-    @Post('createFull')  // POST http://localhost:3000/api/article/createFull/
+    @Post()  // POST http://localhost:3000/api/article/
     @UseGuards(RoleCheckerGuard)
     @AllowToRoles('administrator')
     createFullArticle(@Body() data: AddArticleDto) {

@@ -68,15 +68,15 @@ export class AuthController {
     }
 
 
-
-    @Put('user/register')  //  PUT http://localhost:3000/auth/user/register/
+    //  POST http://localhost:3000/auth/user/register/
+    @Post('user/register')
     async userRegister(@Body() data: UserRegistrationDto) {
         return await this.userService.register(data);
     }
 
 
-
-    @Post('user/login') // http://localhost:3000/auth/user/login
+    // POST  http://localhost:3000/auth/user/login
+    @Post('user/login')
     async doUserLogin(@Body() data: LoginUserDto, @Req() req: Request): Promise<LoginInfoDto | ApiResponse> {
 
         //get user from repository by email provided by client
