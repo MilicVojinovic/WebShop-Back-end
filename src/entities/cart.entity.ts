@@ -22,10 +22,10 @@ export class Cart {
   userId: number;
 
   @Column( {type:"timestamp",
-    name: "created_id",
+    name: "created_at",
     default: () => "CURRENT_TIMESTAMP",
   })
-  createdId: Date;
+  createdAt: Date;
 
   @OneToMany(() => CartArticle, (cartArticle) => cartArticle.cart)
   cartArticles: CartArticle[];
