@@ -12,16 +12,19 @@ import { CartArticle } from "./cart-article.entity";
 import { User } from "./user.entity";
 import { Order } from "./order.entity";
 
+
+
 @Index("fk_cart_user_id", ["userId"], {})
 @Entity("cart")
 export class Cart {
   @PrimaryGeneratedColumn({ type: "int", name: "cart_id", unsigned: true })
   cartId: number;
 
-  @Column({ type:"int",name: "user_id" })
+  @Column({ type: "int", name: "user_id" })
   userId: number;
 
-  @Column( {type:"timestamp",
+  @Column({
+    type: "timestamp",
     name: "created_at",
     default: () => "CURRENT_TIMESTAMP",
   })

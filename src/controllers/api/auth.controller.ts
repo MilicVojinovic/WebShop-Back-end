@@ -10,7 +10,7 @@ import { Request } from "express";
 import { jwtSecret } from "config/jwt.secret";
 import { UserRegistrationDto } from "src/dtos/user/user.registration.dto";
 import { UserService } from "src/services/user/user.service";
-import { LoginUserDto } from "src/dtos/administrator/login.user.dto ";
+import { LoginUserDto } from "src/dtos/user/login.user.dto ";
 
 @Controller('auth')
 export class AuthController {
