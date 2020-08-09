@@ -15,6 +15,7 @@ import * as sharp from 'sharp';
 import { EditArticleDto } from "src/dtos/article/edit.article.dto";
 import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
 import { RoleCheckerGuard } from "src/misc/role.checker.guard";
+import { ArticleSearchDto } from "src/dtos/article/article.search.dto";
 
 @Controller('api/article')
 @Crud({
@@ -190,8 +191,6 @@ export class ArticleController {
         return savedPhoto;
     }
 
-
-
     async createResizedImage(photo, resizeSettings) {
 
         const originalFilePath = photo.path;
@@ -212,7 +211,8 @@ export class ArticleController {
     // http://localhost:3000/api/article/1/deletePhoto/45/
     @Delete(':articleId/deletePhoto/:photoId')
     @UseGuards(RoleCheckerGuard)
-    @AllowToRoles('administrator') public async deletePhoto(
+    @AllowToRoles('administrator')
+    public async deletePhoto(
         @Param('articleId') articleId: number,
         @Param('photoId') photoId: number) {
 
@@ -234,7 +234,6 @@ export class ArticleController {
                 + photo.imagePath);
         } catch (e) { }
 
-
         const deleteResult = await this.photoService.deleteById(photoId);
 
         if (deleteResult.affected === 0) {
@@ -242,15 +241,13 @@ export class ArticleController {
         }
 
         return new ApiResponse('ok', 0, 'One photo deleted');
-
-
-
-
-
     }
 
-
-
+    @Post('search')
+    @UseGuards(RoleCheckerGuard)
+    @AllowToRoles('administrator' , 'user')
+    async search (@Body() data: ArticleSearchDto) : Promise<Article[]>{
+        return await this.service.search(data);}
 
 
 

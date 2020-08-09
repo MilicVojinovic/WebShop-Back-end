@@ -1,46 +1,45 @@
 import { Injectable } from "@nestjs/common";
 import { TypeOrmCrudService } from "@nestjsx/crud-typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, In } from "typeorm";
 import { Article } from "src/entities/article.entity";
 import { AddArticleDto } from "src/dtos/article/add.article.dto";
 import { ApiResponse } from "src/misc/api.response.class";
 import { ArticlePrice } from "src/entities/article-price.entity";
 import { ArticleFeature } from "src/entities/article-feature.entity";
 import { EditArticleDto } from "src/dtos/article/edit.article.dto";
+import { ArticleSearchDto } from "src/dtos/article/article.search.dto";
 
 @Injectable()
 export class ArticleService extends TypeOrmCrudService<Article>{
-    constructor (
-        @InjectRepository(Article) private readonly article: Repository<Article> ,//  moramo evidentirati u app module!!!!
-         
+    constructor(
+        @InjectRepository(Article) private readonly article: Repository<Article>,//  moramo evidentirati u app module!!!!
+
 
         @InjectRepository(ArticlePrice) private readonly articlePrice: Repository<ArticlePrice>,//  moramo evidentirati u app module!!!!
-      
+
 
         @InjectRepository(ArticleFeature) private readonly articleFeature: Repository<ArticleFeature>//  moramo evidentirati u app module!!!!
-        ) 
-        
-        {
+    ) {
         super(article);
     }
 
-    async createFullArticle (data: AddArticleDto) : Promise<Article | ApiResponse >{
-        let newArticle : Article = new Article();
-        newArticle.name =  data.name;
+    async createFullArticle(data: AddArticleDto): Promise<Article | ApiResponse> {
+        let newArticle: Article = new Article();
+        newArticle.name = data.name;
         newArticle.categoryId = data.categoryId;
         newArticle.excerpt = data.excerpt;
         newArticle.description = data.description;
 
-        let savedArticle  = await this.article.save(newArticle);
+        let savedArticle = await this.article.save(newArticle);
 
-        let newArticlePrice : ArticlePrice = new ArticlePrice();
+        let newArticlePrice: ArticlePrice = new ArticlePrice();
         newArticlePrice.articleId = savedArticle.articleId;
         newArticlePrice.price = data.price;
 
         await this.articlePrice.save(newArticlePrice);
 
-        for (let feature of data.features){
+        for (let feature of data.features) {
             let newArticleFeature = new ArticleFeature();
             newArticleFeature.articleId = savedArticle.articleId;
             newArticleFeature.featureId = feature.featureId;
@@ -49,24 +48,24 @@ export class ArticleService extends TypeOrmCrudService<Article>{
             await this.articleFeature.save(newArticleFeature);
         }
 
-        return await this.article.findOne(savedArticle.articleId , {
+        return await this.article.findOne(savedArticle.articleId, {
             relations: [
-                 "category",
-                 "articleFeatures",
-                 "features",
-                 "articlePrices"
+                "category",
+                "articleFeatures",
+                "features",
+                "articlePrices"
             ]
         });
 
     }
 
-    async editFullArticle(articleId : number , data : EditArticleDto) : Promise<Article | ApiResponse>{
-        const existingArticle : Article = await this.article.findOne(articleId , {
-            relations: ['articlePrices' , 'articleFeatures']
+    async editFullArticle(articleId: number, data: EditArticleDto): Promise<Article | ApiResponse> {
+        const existingArticle: Article = await this.article.findOne(articleId, {
+            relations: ['articlePrices', 'articleFeatures']
         });
 
-        if(!existingArticle) {
-            return new ApiResponse('error' , -5001 , 'Article not found');
+        if (!existingArticle) {
+            return new ApiResponse('error', -5001, 'Article not found');
         }
 
         existingArticle.name = data.name;
@@ -75,55 +74,160 @@ export class ArticleService extends TypeOrmCrudService<Article>{
         existingArticle.description = data.description;
         existingArticle.status = data.status;
         existingArticle.isPromoted = data.isPromoted;
-        
+
         const savedArticle = await this.article.save(existingArticle);
 
-        if(!savedArticle) {
-            return new ApiResponse('error' , -5002 , 'Could not save new article data.');
+        if (!savedArticle) {
+            return new ApiResponse('error', -5002, 'Could not save new article data.');
         }
 
-        const newPrice: string = Number( data.price ).toFixed(2);
+        const newPrice: string = Number(data.price).toFixed(2);
 
-        const lastPrice = existingArticle.articlePrices[existingArticle.articlePrices.length - 1 ].price; 
+        const lastPrice = existingArticle.articlePrices[existingArticle.articlePrices.length - 1].price;
 
-        const lastPriceString : string = Number(lastPrice).toFixed(2); 
+        const lastPriceString: string = Number(lastPrice).toFixed(2);
 
-        if(newPrice !== lastPriceString) {
+        if (newPrice !== lastPriceString) {
             const newArticlePrice = new ArticlePrice();
             newArticlePrice.articleId = articleId;
             newArticlePrice.price = data.price;
 
             const savedArticlePrice = await this.articlePrice.save(newArticlePrice);
-            if(!savedArticlePrice){
-                return new ApiResponse('error' , -5003 , 'Could not save new article price.');
+            if (!savedArticlePrice) {
+                return new ApiResponse('error', -5003, 'Could not save new article price.');
             }
 
         }
 
-        if(data.features !== null) {
+        if (data.features !== null) {
             await this.articleFeature.remove(existingArticle.articleFeatures);
 
-            for (let feature of data.features){
+            for (let feature of data.features) {
                 let newArticleFeature = new ArticleFeature();
                 newArticleFeature.articleId = articleId;
                 newArticleFeature.featureId = feature.featureId;
                 newArticleFeature.value = feature.value;
-    
+
                 await this.articleFeature.save(newArticleFeature);
             }
         }
 
-        return await this.article.findOne(articleId , {
+        return await this.article.findOne(articleId, {
             relations: [
-                 "category",
-                 "articleFeatures",
-                 "features",
-                 "articlePrices"
+                "category",
+                "articleFeatures",
+                "features",
+                "articlePrices",
+                "photos"
+            ]
+        });
+    }
+
+    async search(data: ArticleSearchDto): Promise<Article[]> {
+        const builder = await this.article.createQueryBuilder("article");
+
+        builder.innerJoinAndSelect(
+            "article.articlePrices",
+            "ap",
+            'ap.createdAt = (SELECT MAX(ap.created_at)' +  
+             'FROM article_price AS ap WHERE ap.article_id = article.article_id)' 
+             // Not a best practice,better to do it with trigger and set the newest article price to 1 and others to 0 !!!
+        );
+        builder.leftJoin("article.articleFeatures", "af");
+
+        // filter article by category
+        builder.where('article.categoryId = :catId', { catId: data.categoryId })
+
+        // filter article name,excerpt or description with keywords
+
+        if (data.keywords && data.keywords.length > 0) {
+            builder.andWhere(`(article.name LIKE :kw OR
+                              article.excerpt LIKE :kw OR
+                              article.description LIKE :kw)`,
+                { kw: '%' + data.keywords.trim() + '%' });
+        }
+
+        // filter article by setting  min price
+        if (data.priceMin && typeof data.priceMin === 'number') {
+            builder.andWhere('ap.price >= :min',
+                { min: data.priceMin });
+        }
+
+        // filter article by  setting  max price
+        if (data.priceMax && typeof data.priceMax === 'number') {
+            builder.andWhere('ap.price <= :max',
+                { max: data.priceMax });
+        }
+
+        // filter article by feature or features
+        if (data.features && data.features.length > 0) {
+            for (const feature of data.features) {
+                builder.andWhere(
+                    'af.featureId = :fId AND af.value IN (:fVals)',
+                    {
+                        fId: feature.featureId,
+                        fVals: feature.values,
+                    })
+            }
+        }
+
+        // arrange articles by name or by price in ascending or descending order 
+        let orderBy = 'article.name';
+        let orderDirection: "ASC" | "DESC" = 'ASC';
+
+        if (data.orderBy) {
+            
+            if (data.orderBy === "price") {
+                orderBy = 'ap.price';  
+            }
+
+            if (data.orderBy === "name") {
+                orderBy = 'article.name';  
+            }
+        }
+
+        if (data.orderDirection) {
+            orderDirection = data.orderDirection;
+        }
+
+        builder.orderBy(orderBy, orderDirection);
+
+
+        // set number of articles on page 
+        let page = 0;
+        let perPage: 5 | 10 | 25 | 50 | 75 = 25;
+
+        if (data.page && typeof data.page === 'number') {
+            page = data.page;
+        }
+
+        if (data.itemsPerPage && typeof data.itemsPerPage === 'number') {
+            perPage = data.itemsPerPage;
+        }
+
+        builder.skip(page * perPage);
+
+        builder.take(perPage);
+
+        let articleIds = (await builder.getMany()).map(article => article.articleId);
+
+        
+
+        return await this.article.find({
+            where : {articleId : In(articleIds)},
+            relations: [
+                "category",
+                "articleFeatures",
+                "features",
+                "articlePrices",
+                "photos"
             ]
         });
 
+       
 
 
-    } 
 
+
+    }
 }
