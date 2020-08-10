@@ -13,6 +13,7 @@ import { EditArticleInCartDto } from "src/dtos/cart/edit.article.in.cart.dto";
 import { Order } from "src/entities/order.entity";
 import { OrderService } from "src/services/order/order.service";
 import { ApiResponse } from "src/misc/api.response.class";
+import { OrderMailer } from "src/services/order/order.mailer.service";
 
 @Controller('api/user/cart')
 export class UserCartController {
@@ -21,8 +22,10 @@ export class UserCartController {
         private cartService: CartService,
 
         // use Order Service 
-        private orderService: OrderService
+        private orderService: OrderService,
 
+        // use Order Mailer Service 
+        private orderMailer: OrderMailer
 
     ) { }
 
@@ -86,7 +89,18 @@ export class UserCartController {
         // get cart for user based on his id from token 
         const cart = await this.getActiveCartForUserId(req.token.id);
 
-        return await this.orderService.add(cart.cartId);
+        // check if order already exist,
+        // if not create new and return order data
+        const order = await this.orderService.add(cart.cartId);
+
+        if (order instanceof ApiResponse ){
+            return order;
+        }
+
+        await this.orderMailer.sendOrderEmail(order);
+
+
+        return order;
         
     }
 

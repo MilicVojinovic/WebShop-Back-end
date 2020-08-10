@@ -17,29 +17,36 @@ export class OrderService {
     ) { }
 
     async add(cartId: number): Promise<Order | ApiResponse> {
+
+        // find order with cartId 
         const order = await this.order.findOne({
             cartId : cartId,
         });
-
+        
+        // check if order for specified cartId exist
         if(order){
-            console.log( order.orderId);
             return new ApiResponse("error" , -7001 , "An order for this cart has already been made.");
         }
 
+        // find cart with specified cartId
         const cart = await this.cart.findOne(cartId, {
             relations: [
                 "cartArticles"
             ]
         });
 
+        // check if cart for specified cartId exist
         if(!cart){
             return new ApiResponse("error" , -7002 , "No such curt found");
         }
 
+        // check if cart for specified cartId has articles
         if(cart.cartArticles.length === 0){
             return new ApiResponse("error" , -7003 , "This cart is empty");
         }
 
+        // create new order for specified cartId,save it to database 
+        // and return order data
         const newOrder : Order = new Order();
 
         newOrder.cartId = cartId;
