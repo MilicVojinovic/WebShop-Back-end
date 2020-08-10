@@ -8,6 +8,6 @@ export class LoginAdministratorDto {
 
     @Validator.IsNotEmpty()
     @Validator.IsString()
-    @Validator.Length(6, 128)
+    @Validator.Length(3, 128)
     password: string;
 }

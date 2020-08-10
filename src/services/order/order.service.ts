@@ -20,12 +20,12 @@ export class OrderService {
 
         // find order with cartId 
         const order = await this.order.findOne({
-            cartId : cartId,
+            cartId: cartId,
         });
-        
+
         // check if order for specified cartId exist
-        if(order){
-            return new ApiResponse("error" , -7001 , "An order for this cart has already been made.");
+        if (order) {
+            return new ApiResponse("error", -7001, "An order for this cart has already been made.");
         }
 
         // find cart with specified cartId
@@ -36,24 +36,28 @@ export class OrderService {
         });
 
         // check if cart for specified cartId exist
-        if(!cart){
-            return new ApiResponse("error" , -7002 , "No such curt found");
+        if (!cart) {
+            return new ApiResponse("error", -7002, "No such curt found");
         }
 
         // check if cart for specified cartId has articles
-        if(cart.cartArticles.length === 0){
-            return new ApiResponse("error" , -7003 , "This cart is empty");
+        if (cart.cartArticles.length === 0) {
+            return new ApiResponse("error", -7003, "This cart is empty");
         }
 
         // create new order for specified cartId,save it to database 
-        // and return order data
-        const newOrder : Order = new Order();
+        // and return order info
+        const newOrder: Order = new Order();
 
         newOrder.cartId = cartId;
 
         const savedOrder = await this.order.save(newOrder);
 
-        return await this.order.findOne(savedOrder.orderId, {
+        return await this.getById(savedOrder.orderId)
+    }
+
+    async getById(orderId: number) {
+        return await this.order.findOne(orderId, {
             relations: [
                 "cart",
                 "cart.user",
@@ -63,6 +67,21 @@ export class OrderService {
                 "cart.cartArticles.article.articlePrices",
             ]
         })
+    }
+
+    async changeStatus(orderId: number, newStatus: "rejected" | "accepted" | "shipped" | "pending") {
+        const order = await this.getById(orderId);
+
+        if (!order) {
+            return new ApiResponse("error", -9001, "No such order found!")!
+        }
+
+        order.status = newStatus;
+
+        await this.order.save(order);
+
+        return await this.getById(orderId);
+
 
     }
 
