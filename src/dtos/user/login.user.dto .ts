@@ -12,7 +12,7 @@ export class LoginUserDto {
 
     @Validator.IsNotEmpty()
     @Validator.IsString()
-    @Validator.Length(6, 128)
+    @Validator.Length(3, 128)
     //  it would be ideally if we apply some reg ex for password validation: small letters,numbers,capital letters
     password: string;
 }

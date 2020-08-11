@@ -10,7 +10,7 @@ import { UserService } from "src/services/user/user.service";
 export class AuthMiddleware implements NestMiddleware {
     constructor(
         public administratorService: AdministratorService,
-        public userService: UserService  //moramo exportovati u app modulu!!!
+        public userService: UserService  //must export in app module!!!
 
     ) { }
 
@@ -68,10 +68,9 @@ export class AuthMiddleware implements NestMiddleware {
         }
 
         // check if token didn't expire
-        let sada = new Date();
-        const trenutniTimestamp = new Date().getTime() / 1000;
+        const currentTimestamp = new Date().getTime() / 1000;
 
-        if (trenutniTimestamp >= jwtData.exp) {
+        if (currentTimestamp >= jwtData.exp) {
             throw new HttpException('The token has expired', HttpStatus.UNAUTHORIZED);
         }
 
