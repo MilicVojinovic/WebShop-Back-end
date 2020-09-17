@@ -80,9 +80,6 @@ export class Article {
   @JoinColumn([{ name: "category_id", referencedColumnName: "categoryId" }])
   category: Category;
 
-
-
-
   @OneToMany(() => ArticleFeature, (articleFeature) => articleFeature.article)
   articleFeatures: ArticleFeature[];
 

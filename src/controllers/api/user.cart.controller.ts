@@ -1,14 +1,10 @@
 import { Controller, Get, UseGuards, Req, Post, Body, Patch } from "@nestjs/common";
-import { AdministratorService } from "src/services/administrator/administrator.service";
 import { RoleCheckerGuard } from "src/misc/role.checker.guard";
 import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
-import { Administrator } from "src/entities/administrator.entity";
 import { CartService } from "src/services/cart/cart.service";
 import { Cart } from "src/entities/cart.entity";
 import { Request } from "express";
-import { AddArticleDto } from "src/dtos/article/add.article.dto";
 import { AddArticleToCartDto } from "src/dtos/cart/add.article.to.cart.dto";
-import { EditArticleDto } from "src/dtos/article/edit.article.dto";
 import { EditArticleInCartDto } from "src/dtos/cart/edit.article.in.cart.dto";
 import { Order } from "src/entities/order.entity";
 import { OrderService } from "src/services/order/order.service";
@@ -91,7 +87,7 @@ export class UserCartController {
 
         // check if order already exist,
         // if not create new and return order data
-        const order = await this.orderService.add(cart.cartId);
+        const order = await this.orderService.add(cart.cartId , req.token.id);
 
         if (order instanceof ApiResponse ){
             return order;
@@ -99,11 +95,16 @@ export class UserCartController {
 
         await this.orderMailer.sendOrderEmail(order);
 
-
         return order;
         
     }
 
-
+    // GET http://localhost:3000/api/user/cart/orders/
+    @Get('orders')
+    @UseGuards(RoleCheckerGuard)
+    @AllowToRoles('user')
+    async getOrders(@Req() req:Request):Promise <Order[]>{
+        return await this.orderService.getAllByUserId(req.token.id);
+    }
 
 }

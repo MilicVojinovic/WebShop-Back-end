@@ -3,11 +3,15 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Cart } from "./cart.entity";
 import * as Validator from "class-validator";
+import { User } from "./user.entity";
 
 
 @Index("uq_order_cart_id", ["cartId"], { unique: true })
@@ -38,10 +42,28 @@ export class Order {
   @Validator.IsIn([ "rejected", "accepted", "shipped", "pending"  ])
   status: "rejected" | "accepted" | "shipped" | "pending";
 
+  @Column( {type: "int",
+  name: "user_id"
+     })
+  @Validator.IsNotEmpty()
+  @Validator.IsNumber()
+  userId : number;
+
   @OneToOne(() => Cart, (cart) => cart.order, {
     onDelete: "NO ACTION",
     onUpdate: "CASCADE",
   })
   @JoinColumn([{ name: "cart_id", referencedColumnName: "cartId" }])
   cart: Cart;
+
+  // @ManyToOne(() => User, user => user.orders)
+  // @JoinTable({
+  //   name: "cart",
+  //   joinColumn: { name: "order_id", referencedColumnName: "orderId" },
+  //   inverseJoinColumn: { name: "user_id", referencedColumnName: "userId" }
+  // })
+  // user: User;
+
+
+
 }

@@ -2,11 +2,14 @@ import {
   Column,
   Entity,
   Index,
+  JoinTable,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Cart } from "./cart.entity";
 import * as Validator from "class-validator";
+import { Order } from "./order.entity";
 
 @Index("uq_user_email", ["email"], { unique: true })
 @Index("uq_user_phone_number", ["phoneNumber"], { unique: true })
@@ -77,4 +80,12 @@ export class User {
 
   @OneToMany(() => Cart, (cart) => cart.user)
   carts: Cart[];
+
+  // @OneToMany(() => Order, order => order.user)
+  // @JoinTable({
+  //   name: "cart",
+  //   joinColumn: {name: "user_id", referencedColumnName: "userId" },
+  //   inverseJoinColumn: { name: "order_id", referencedColumnName: "orderId" }
+  // })
+  // orders: Order[];
 }

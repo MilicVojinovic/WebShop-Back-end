@@ -12,7 +12,7 @@ import { AllowToRoles } from "src/misc/allow.to.roles.descriptor";
     },
     params: {
         id: {
-            field: 'categoryId', // kod milana taira je category_id
+            field: 'categoryId',
             type: 'number',
             primary: true
         }
