@@ -21,7 +21,7 @@ export class AdministratorController {
         return this.administratorService.getAll();
     }
 
-    // GET  http://localhost:3000/api/administrator/4/
+    // GET  http://localhost:3000/api/administrator/:id/
     @Get(':id')
     @UseGuards(RoleCheckerGuard)
     @AllowToRoles('administrator')
@@ -44,7 +44,7 @@ export class AdministratorController {
         return this.administratorService.add(data);
     }
 
-    // PATCH  http://localhost:3000/api/administrator/4/
+    // PATCH  http://localhost:3000/api/administrator/:id/
     @Patch(':id')
     @UseGuards(RoleCheckerGuard)
     @AllowToRoles('administrator')
