@@ -8,32 +8,41 @@ import { ChangeOrderStatusDto } from "src/dtos/order/change.order.status.dto";
 
 @Controller('api/order')
 export class AdministratorOrderController {
-    constructor (
-        private orderService : OrderService,
+    constructor(
+        private orderService: OrderService,
 
-    ){}
+    ) { }
+
+    // GET http://localhost:3000/api/order/
+    @Get()
+    @UseGuards(RoleCheckerGuard)
+    @AllowToRoles('administrator')
+    async getAll(): Promise<Order[]>{
+        return await this.orderService.getAll();
+    }
+
 
     // GET http://localhost:3000/api/order/:id
     @Get(':id')
     @UseGuards(RoleCheckerGuard)
     @AllowToRoles('administrator')
-    async get(@Param('id') id: number): Promise< Order | ApiResponse >{
+    async get(@Param('id') id: number): Promise<Order | ApiResponse> {
         const order = await this.orderService.getById(id);
 
-        if(!order) {
-            return new ApiResponse("error" , -9001 , "No such order found");
+        if (!order) {
+            return new ApiResponse("error", -9001, "No such order found");
         }
 
         return order;
-    } 
+    }
 
     // PATCH http://localhost:3000/api/order/:id
     @Patch(':id')
     @UseGuards(RoleCheckerGuard)
     @AllowToRoles('administrator')
-    async changeStatus( @Param('id') id : number, @Body() data : ChangeOrderStatusDto ) {
+    async changeStatus(@Param('id') id: number, @Body() data: ChangeOrderStatusDto) {
 
-        return await this.orderService.changeStatus(id , data.newStatus);
+        return await this.orderService.changeStatus(id, data.newStatus);
     }
 
 
